@@ -8,10 +8,13 @@ router.get('/search', MovieController.search);
 
 router.get('/popular', MovieController.popular);
 
+// GET /api/movies/genres
+router.get('/genres', MovieController.genres);
+
+// GET /api/movies/discover?with_genres=28&year=2023&page=1
+router.get('/discover', MovieController.discover);
+
 // GET /api/movies/:id
 router.get('/:id', MovieController.details);
-
-// GET /api/movies/:id/recommendations?page=1
-router.get('/:id/recommendations', MovieController.recs);
 
 export { router as movies };
