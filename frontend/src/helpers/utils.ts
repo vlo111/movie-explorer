@@ -1,1 +1,1 @@
-const fallbackError = (context: string | undefined) => `Unable to load ${context}.`;
+export const fallbackError = (context: string | undefined) => `Unable to load ${context}.`;
