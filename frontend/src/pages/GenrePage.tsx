@@ -1,23 +1,21 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { search as searchApi } from '../services/apiService';
+import { searchMovies } from '../services/apiService';
 import MovieCard from '../components/MovieCard';
 import { GENRES } from '../helpers/constants';
+import {useSearchMovies} from "../api/use-search-movies.ts";
+import Pagination from "../components/Pagination.tsx";
+import {useActiveMovieData} from "../hooks/useActiveMovieData.ts";
 
 function GenrePage() {
+    const [page, setPage] = useState(1);
     const { genre } = useParams<{ genre: string }>();
     const navigate = useNavigate();
 
-    const {
-        data: genreMovies,
-        isLoading,
-        isError,
-    } = useQuery({
-        queryKey: ['genre', genre],
-        queryFn: () => searchApi(genre || ''),
-        enabled: !!genre
-    });
+    const { searchData, isLoadingSearch, isErrorSearch } = useSearchMovies(genre ?? '', page);
+
+    const { movies, totalPages } = useActiveMovieData(!!genre, searchData);
 
     const handleBackToHome = () => {
         navigate('/');
@@ -26,8 +24,6 @@ function GenrePage() {
     const handleGenreClick = (selectedGenre: string) => {
         navigate(`/genre/${selectedGenre.toLowerCase()}`);
     };
-
-    const movies = genreMovies?.results || [];
 
     return (
         <div className="container">
@@ -56,20 +52,20 @@ function GenrePage() {
                 </div>
             </div>
 
-            {isLoading && (
+            {isLoadingSearch && (
                 <div className="loading">
                     <div className="spinner"></div>
                     <p>Loading {genre} movies...</p>
                 </div>
             )}
 
-            {isError && (
+            {isErrorSearch && (
                 <div className="message error">
                     {fallbackError(genre)}
                 </div>
             )}
 
-            {!isLoading && movies.length === 0 && (
+            {!isLoadingSearch && movies.length === 0 && (
                 <div className="message">
                     <h3>No movies found</h3>
                 </div>
@@ -80,6 +76,9 @@ function GenrePage() {
                     <MovieCard key={movie.id} movie={movie} />
                 ))}
             </div>
+            {totalPages > 1 && (
+                <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+            )}
         </div>
     );
 }
