@@ -1,59 +1,48 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { popular, search as searchApi } from '../services/apiService';
-import MovieCard from '../components/MovieCard';
 import { GENRES } from '../helpers/constants';
-import {useDebounce} from "../hooks/useDebounce.ts";
+import { useDebounce } from '../hooks/useDebounce';
+import { useGetPopularMovies } from '../api/use-get-popular-movies';
+import { useSearchMovies } from '../api/use-search-movies';
+import Pagination from '../components/Pagination';
+import MovieCard from '../components/MovieCard';
+import {useActiveMovieData} from "../hooks/useActiveMovieData.ts";
 
 function Home() {
+    const [page, setPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState('');
     const debouncedSearchTerm = useDebounce(searchTerm, 700);
     const [currentSearch, setCurrentSearch] = useState('');
     const navigate = useNavigate();
 
-    const {
-        data: popularMovies,
-        isLoading: loadingPopular,
-        isError: popularError,
-    } = useQuery({
-        queryKey: ['popular'],
-        queryFn: () => popular(1),
-        enabled: !debouncedSearchTerm,
-    });
+    const { popularData, isLoadingPopular, isErrorPopular } = useGetPopularMovies(page);
 
-    const {
-        data: searchResults,
-        isLoading: loadingSearch,
-        isError: searchError,
-    } = useQuery({
-        queryKey: ['search', debouncedSearchTerm],
-        queryFn: () => searchApi(debouncedSearchTerm),
-        enabled: !!debouncedSearchTerm,
-    });
+    const { searchData, isLoadingSearch, isErrorSearch } = useSearchMovies(debouncedSearchTerm, page);
+
+    const { movies, totalPages } = useActiveMovieData(!!debouncedSearchTerm, searchData, popularData);
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
         const term = debouncedSearchTerm.trim();
         if (term.length > 1) {
             setCurrentSearch(term);
+            setPage(1);
         }
+    };
+
+    const clearSearch = () => {
+        setSearchTerm('');
+        setCurrentSearch('');
+        setPage(1);
     };
 
     const handleGenreClick = (genre: string) => {
         navigate(`/genre/${genre.toLowerCase()}`);
     };
 
-    const clearSearch = () => {
-        setSearchTerm('');
-        setCurrentSearch('');
-    };
-
-    const movies = searchTerm ? searchResults?.results || [] : popularMovies?.results || [];
-
     return (
         <div className="container">
-            <section style={{marginBottom: '40px'}}>
+            <section style={{ marginBottom: '40px' }}>
                 <form onSubmit={handleSearch} className="search-box">
                     <input
                         className="search-input"
@@ -67,13 +56,11 @@ function Home() {
                 </form>
 
                 <div className="suggestions">
-                    <span style={{color: 'rgba(255, 255, 255, 0.8)', marginRight: '15px'}}>Genres:</span>
+                    <span style={{ color: 'rgba(255, 255, 255, 0.8)', marginRight: '15px' }}>
+                        Genres:
+                    </span>
                     {GENRES.map((genre) => (
-                        <button
-                            key={genre}
-                            className="btn"
-                            onClick={() => handleGenreClick(genre)}
-                        >
+                        <button key={genre} className="btn" onClick={() => handleGenreClick(genre)}>
                             {genre}
                         </button>
                     ))}
@@ -85,7 +72,7 @@ function Home() {
                         <button
                             className="btn"
                             onClick={clearSearch}
-                            style={{marginLeft: '15px', padding: '8px 16px', fontSize: '0.9rem'}}
+                            style={{ marginLeft: '15px', padding: '8px 16px', fontSize: '0.9rem' }}
                         >
                             Clear
                         </button>
@@ -93,23 +80,23 @@ function Home() {
                 )}
             </section>
 
-            {(loadingPopular || loadingSearch) && (
+            {isLoadingSearch && (
                 <div className="loading">
                     <div className="spinner" />
                     <p>Loading movies...</p>
                 </div>
             )}
 
-            {(popularError || searchError) && (
+            {isErrorSearch && (
                 <div className="message error">
-                    Something went wrong.
+                    {fallbackError('movie')}
                 </div>
             )}
 
-            {!loadingPopular && !loadingSearch && movies.length === 0 && currentSearch && (
+            {!isLoadingSearch && movies.length === 0 && currentSearch && (
                 <div className="message">
                     <h3>No results for "{currentSearch}"</h3>
-                    <button className="btn" onClick={clearSearch} style={{marginTop: '15px'}}>
+                    <button className="btn" onClick={clearSearch} style={{ marginTop: '15px' }}>
                         Back to Popular
                     </button>
                 </div>
@@ -120,6 +107,10 @@ function Home() {
                     <MovieCard key={movie.id} movie={movie} />
                 ))}
             </div>
+
+            {totalPages > 1 && (
+                <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+            )}
         </div>
     );
 }

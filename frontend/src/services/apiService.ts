@@ -16,10 +16,10 @@ const apiCall = async (endpoint: string) => {
     }
 };
 
-export const search = (query: string, page = 1) =>
+export const searchMovies = (query: string, page = 1) =>
     apiCall(`/movies/search?q=${encodeURIComponent(query)}&page=${page}`);
 
-export const popular = (page = 1) =>
+export const popularMovies = (page = 1) =>
     apiCall(`/movies/popular?page=${page}`);
 
 export const details = (movieId: number) =>
