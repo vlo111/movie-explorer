@@ -4,9 +4,11 @@ import { useQuery } from '@tanstack/react-query';
 import { popular, search as searchApi } from '../services/apiService';
 import MovieCard from '../components/MovieCard';
 import { GENRES } from '../helpers/constants';
+import {useDebounce} from "../hooks/useDebounce.ts";
 
 function Home() {
     const [searchTerm, setSearchTerm] = useState('');
+    const debouncedSearchTerm = useDebounce(searchTerm, 700);
     const [currentSearch, setCurrentSearch] = useState('');
     const navigate = useNavigate();
 
@@ -17,7 +19,7 @@ function Home() {
     } = useQuery({
         queryKey: ['popular'],
         queryFn: () => popular(1),
-        enabled: !searchTerm,
+        enabled: !debouncedSearchTerm,
     });
 
     const {
@@ -25,14 +27,14 @@ function Home() {
         isLoading: loadingSearch,
         isError: searchError,
     } = useQuery({
-        queryKey: ['search', searchTerm],
-        queryFn: () => searchApi(searchTerm),
-        enabled: !!searchTerm,
+        queryKey: ['search', debouncedSearchTerm],
+        queryFn: () => searchApi(debouncedSearchTerm),
+        enabled: !!debouncedSearchTerm,
     });
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
-        const term = searchTerm.trim();
+        const term = debouncedSearchTerm.trim();
         if (term.length > 1) {
             setCurrentSearch(term);
         }
