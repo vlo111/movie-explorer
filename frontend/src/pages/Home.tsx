@@ -1,48 +1,64 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { GENRES } from '../helpers/constants';
+import React, { useState, useEffect } from 'react';
 import { useDebounce } from '../hooks/useDebounce';
 import { useGetPopularMovies } from '../api/use-get-popular-movies';
 import { useSearchMovies } from '../api/use-search-movies';
 import Pagination from '../components/Pagination';
 import MovieCard from '../components/MovieCard';
-import {useActiveMovieData} from "../hooks/useActiveMovieData.ts";
+import { useMovieState } from "../hooks/useMovieState";
+import {fallbackError} from "../helpers/utils";
+import DiscoverFilters from "../components/DiscoverFilters";
+import {useDiscoverMovies} from "../api/use-discover-movies";
 
 function Home() {
     const [page, setPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState('');
-    const debouncedSearchTerm = useDebounce(searchTerm, 700);
+    const debouncedSearch = useDebounce(searchTerm, 700);
     const [currentSearch, setCurrentSearch] = useState('');
-    const navigate = useNavigate();
+    const [filters, setFilters] = useState({});
 
-    const { popularData, isLoadingPopular, isErrorPopular } = useGetPopularMovies(page);
+    useEffect(() => {
+        if (debouncedSearch.trim().length > 0 && Object.keys(filters).length > 0) {
+            setFilters({});
+        }
+    }, [debouncedSearch]);
 
-    const { searchData, isLoadingSearch, isErrorSearch } = useSearchMovies(debouncedSearchTerm, page);
+    const { discoverData, isLoadingDiscover, isErrorDiscover } = useDiscoverMovies(filters, page);
+    const { popularData } = useGetPopularMovies(page);
+    const { searchData, isLoadingSearch, isErrorSearch } = useSearchMovies(debouncedSearch, page);
 
-    const { movies, totalPages } = useActiveMovieData(!!debouncedSearchTerm, searchData, popularData);
+    const { movies, totalPages, isLoading, isError, isEmpty } =
+        useMovieState({
+            searchTerm: debouncedSearch,
+            filters, searchData, discoverData,
+            popularData, isLoadingSearch,
+            isLoadingDiscover, isErrorSearch,
+            isErrorDiscover
+        });
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
-        const term = debouncedSearchTerm.trim();
+        const term = debouncedSearch.trim();
         if (term.length > 1) {
             setCurrentSearch(term);
             setPage(1);
+            if (Object.keys(filters).length > 0) {
+                setFilters({});
+            }
         }
     };
 
-    const clearSearch = () => {
-        setSearchTerm('');
-        setCurrentSearch('');
+    const handleFiltersChange = (newFilters) => {
+        setFilters(newFilters);
         setPage(1);
-    };
-
-    const handleGenreClick = (genre: string) => {
-        navigate(`/genre/${genre.toLowerCase()}`);
+        if (searchTerm.trim().length > 0 || currentSearch.length > 0) {
+            setSearchTerm('');
+            setCurrentSearch('');
+        }
     };
 
     return (
-        <div className="container">
-            <section style={{ marginBottom: '40px' }}>
+        <React.Fragment>
+            <section style={{marginBottom: '40px'}}>
                 <form onSubmit={handleSearch} className="search-box">
                     <input
                         className="search-input"
@@ -54,64 +70,41 @@ function Home() {
                         Search
                     </button>
                 </form>
-
-                <div className="suggestions">
-                    <span style={{ color: 'rgba(255, 255, 255, 0.8)', marginRight: '15px' }}>
-                        Genres:
-                    </span>
-                    {GENRES.map((genre) => (
-                        <button key={genre} className="btn" onClick={() => handleGenreClick(genre)}>
-                            {genre}
-                        </button>
-                    ))}
-                </div>
-
-                {currentSearch && (
-                    <div className="message">
-                        Searching for: "{currentSearch}"
-                        <button
-                            className="btn"
-                            onClick={clearSearch}
-                            style={{ marginLeft: '15px', padding: '8px 16px', fontSize: '0.9rem' }}
-                        >
-                            Clear
-                        </button>
-                    </div>
-                )}
             </section>
+            <main className="home-container">
+                <DiscoverFilters currentFilters={filters} onFiltersChange={handleFiltersChange}/>
+                <div className="home-grid">
+                    {isLoading && (
+                        <div className="loading">
+                            <div className="spinner"/>
+                            <p>Loading movies...</p>
+                        </div>
+                    )}
 
-            {isLoadingSearch && (
-                <div className="loading">
-                    <div className="spinner" />
-                    <p>Loading movies...</p>
+                    {isError && (
+                        <div className="message error">
+                            {fallbackError('movie')}
+                        </div>
+                    )}
+
+                    {isEmpty && (
+                        <div className="message">
+                            <h3>No results</h3>
+                        </div>
+                    )}
+
+                    <div className="grid">
+                        {movies.map((movie) => (
+                            <MovieCard key={movie.id} movie={movie}/>
+                        ))}
+                    </div>
+
+                    {totalPages > 1 && (
+                        <Pagination page={page} totalPages={totalPages} onPageChange={setPage}/>
+                    )}
                 </div>
-            )}
-
-            {isErrorSearch && (
-                <div className="message error">
-                    {fallbackError('movie')}
-                </div>
-            )}
-
-            {!isLoadingSearch && movies.length === 0 && currentSearch && (
-                <div className="message">
-                    <h3>No results for "{currentSearch}"</h3>
-                    <button className="btn" onClick={clearSearch} style={{ marginTop: '15px' }}>
-                        Back to Popular
-                    </button>
-                </div>
-            )}
-
-            <div className="grid">
-                {movies.map((movie) => (
-                    <MovieCard key={movie.id} movie={movie} />
-                ))}
-            </div>
-
-            {totalPages > 1 && (
-                <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
-            )}
-        </div>
+            </main>
+        </React.Fragment>
     );
 }
 

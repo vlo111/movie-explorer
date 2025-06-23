@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { details as getDetails } from '../services/apiService';
 import MovieDetailsView from '../components/MovieDetailsView';
+import { fallbackError } from '../helpers/utils';
 
 function MoviePage() {
     const { id } = useParams<{ id: string }>();

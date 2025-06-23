@@ -1,5 +1,5 @@
 import React from 'react'
-import {getImageUrl} from "../services/apiService.ts";
+import {getImageUrl} from "../services/apiService";
 
 function MovieDetailsView({movie, setSelectedMovieId}) {
     return (

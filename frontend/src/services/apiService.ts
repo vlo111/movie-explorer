@@ -2,7 +2,6 @@ const API_BASE = '/api';
 
 const apiCall = async (endpoint: string) => {
     const url = `${import.meta.env.VITE_API_BASE_URL}${API_BASE}${endpoint}`;
-    console.log('API call:', url); // Debug log
 
     try {
         const response = await fetch(url);
@@ -25,13 +24,18 @@ export const popularMovies = (page = 1) =>
 export const details = (movieId: number) =>
     apiCall(`/movies/${movieId}`);
 
-export const recs = (movieId: number, page = 1) =>
-    apiCall(`/movies/${movieId}/recommendations?page=${page}`);
+export const discoverMovies = (filters: any = {}, page = 1) => {
+    const params = new URLSearchParams({
+        page: page.toString(),
+        ...filters
+    });
+    return apiCall(`/movies/discover?${params}`);
+};
 
-// Handle missing poster images - TMDB sometimes returns null
+export const getGenres = () => apiCall('/movies/genres');
+
 export const getImageUrl = (posterPath: string | null, size = 'w500') => {
     if (!posterPath) {
-        // Using this default image for now, add a fallback image later
         return 'https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png';
     }
     return `https://image.tmdb.org/t/p/${size}${posterPath}`;
