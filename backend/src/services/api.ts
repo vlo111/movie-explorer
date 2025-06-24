@@ -4,7 +4,7 @@ const API_KEY = process.env.TMDB_API_KEY;
 const BASE = process.env.TMDB_BASE_URL;
 
 if (!API_KEY) {
-    console.log('no TMDB_API_KEY, check .env');
+    console.log('no TMDB_API_KEY, check .env .');
     process.exit(1);
 }
 
