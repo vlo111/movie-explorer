@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import {searchMovies} from '../services/apiService';
+import {searchMovies} from '../../services/apiService.ts';
+import {LIMIT_MOVIE} from "../../helpers/constants.ts";
 
 export const useSearchMovies = (search: string, page: number) => {
 
@@ -10,7 +11,7 @@ export const useSearchMovies = (search: string, page: number) => {
         keepPreviousData: true,
         select: (data) => ({
             ...data,
-            results: data.results.slice(0, 8), // Limit to 8 movies
+            results: data.results.slice(0, LIMIT_MOVIE),
         }),
     }
 

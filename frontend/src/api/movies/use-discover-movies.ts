@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
-import { discoverMovies } from '../services/apiService';
-import {IDiscoverFilters} from "../types/api.ts";
+import { discoverMovies } from '../../services/apiService.ts';
+import {IDiscoverFilters} from "../../types/api";
+import {LIMIT_MOVIE} from "../../helpers/constants.ts";
 
 export const useDiscoverMovies = (filters: IDiscoverFilters, page: number) => {
     const options = {
@@ -9,7 +10,7 @@ export const useDiscoverMovies = (filters: IDiscoverFilters, page: number) => {
         keepPreviousData: true,
         select: (data) => ({
             ...data,
-            results: data.results || [],
+            results: data.results.slice(0, LIMIT_MOVIE),
         }),
     };
 

@@ -24,7 +24,7 @@ export const popularMovies = (page = 1) =>
 export const details = (movieId: number) =>
     apiCall(`/movies/${movieId}`);
 
-export const discoverMovies = (filters: any = {}, page = 1) => {
+export const discoverMovies = (filters = {}, page = 1) => {
     const params = new URLSearchParams({
         page: page.toString(),
         ...filters

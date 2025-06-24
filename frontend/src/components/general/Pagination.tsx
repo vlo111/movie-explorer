@@ -1,6 +1,9 @@
-function Pagination({ page, totalPages, onPageChange }) {
+import React from 'react';
+import {IPaginationProps} from "../../types";
+
+const Pagination: React.FC<IPaginationProps> = ({ page, totalPages, onPageChange }) => {
     return (
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', margin: '20px 0' }}>
+        <div className="pagination">
             <button
                 className="btn"
                 onClick={() => onPageChange(page - 1)}
@@ -9,9 +12,9 @@ function Pagination({ page, totalPages, onPageChange }) {
                 Previous
             </button>
 
-            <span style={{ color: 'white', padding: '15px' }}>
-        Page {page} of {totalPages}
-      </span>
+            <span className="pagination-info">
+                Page {page} of {totalPages}
+            </span>
 
             <button
                 className="btn"

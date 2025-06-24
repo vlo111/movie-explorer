@@ -2,11 +2,12 @@ import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { details as getDetails } from '../services/apiService';
-import MovieDetailsView from '../components/MovieDetailsView';
+import MovieDetailsView from '../components/movie/MovieDetailsView.tsx';
 import { fallbackError } from '../helpers/utils';
+import {IRouteParams} from "../types";
 
 function MoviePage() {
-    const { id } = useParams<{ id: string }>();
+    const { id } = useParams<IRouteParams>();
     const navigate = useNavigate();
     const movieId = id ? parseInt(id) : null;
 

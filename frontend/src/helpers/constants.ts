@@ -1,11 +1,13 @@
+import {SearchOptionsType} from "../types";
+
 export const PATHS = {
     ROOT: '/',
     MOVIE: '/movie/:id',
-    DISCOVER: '/discover'
+    DISCOVER: '/discover',
+    NOTES: '/notes'
 };
 
-
-export const SORT_OPTIONS = [
+export const SORT_OPTIONS: SearchOptionsType = [
     { value: 'popularity.desc', label: 'Most Popular' },
     { value: 'popularity.asc', label: 'Least Popular' },
     { value: 'release_date.desc', label: 'Newest First' },
@@ -15,3 +17,5 @@ export const SORT_OPTIONS = [
     { value: 'title.asc', label: 'A-Z' },
     { value: 'title.desc', label: 'Z-A' }
 ];
+
+export const LIMIT_MOVIE = 8

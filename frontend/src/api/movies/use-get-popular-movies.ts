@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import {popularMovies} from '../services/apiService';
+import {popularMovies} from '../../services/apiService.ts';
+import {LIMIT_MOVIE} from "../../helpers/constants.ts";
 
 export const useGetPopularMovies = (page) => {
     const options = {
@@ -8,7 +9,7 @@ export const useGetPopularMovies = (page) => {
         keepPreviousData: true,
         select: (data) => ({
             ...data,
-            results: data.results.slice(0, 8),
+            results: data.results.slice(0, LIMIT_MOVIE),
         }),
     }
 

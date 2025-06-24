@@ -1,37 +1,45 @@
 import React, { useState, useEffect } from 'react';
 import { useDebounce } from '../hooks/useDebounce';
-import { useGetPopularMovies } from '../api/use-get-popular-movies';
-import { useSearchMovies } from '../api/use-search-movies';
-import Pagination from '../components/Pagination';
-import MovieCard from '../components/MovieCard';
+import { useGetPopularMovies } from '../api/movies/use-get-popular-movies.ts';
+import { useSearchMovies } from '../api/movies/use-search-movies.ts';
+import Pagination from '../components/general/Pagination.tsx';
+import MovieCard from '../components/movie/MovieCard.tsx';
 import { useMovieState } from "../hooks/useMovieState";
 import {fallbackError} from "../helpers/utils";
-import DiscoverFilters from "../components/DiscoverFilters";
-import {useDiscoverMovies} from "../api/use-discover-movies";
+import DiscoverFilters from "../components/movie/DiscoverFilters.tsx";
+import {useDiscoverMovies} from "../api/movies/use-discover-movies.ts";
+import {IHomeState} from "../types/hooks";
 
 function Home() {
-    const [page, setPage] = useState(1);
-    const [searchTerm, setSearchTerm] = useState('');
-    const debouncedSearch = useDebounce(searchTerm, 700);
-    const [currentSearch, setCurrentSearch] = useState('');
-    const [filters, setFilters] = useState({});
+    const [state, setState] = useState<IHomeState>({
+        page: 1,
+        searchTerm: '',
+        currentSearch: '',
+        filters: {}
+    });
+
+    const debouncedSearch = useDebounce(state.searchTerm, 700);
 
     useEffect(() => {
-        if (debouncedSearch.trim().length > 0 && Object.keys(filters).length > 0) {
-            setFilters({});
+        if (debouncedSearch.trim().length > 0 && Object.keys(state.filters).length > 0) {
+            setState(prev => ({ ...prev, filters: {} }));
         }
     }, [debouncedSearch]);
 
-    const { discoverData, isLoadingDiscover, isErrorDiscover } = useDiscoverMovies(filters, page);
-    const { popularData } = useGetPopularMovies(page);
-    const { searchData, isLoadingSearch, isErrorSearch } = useSearchMovies(debouncedSearch, page);
+    const { discoverData, isLoadingDiscover, isErrorDiscover } = useDiscoverMovies(state.filters, state.page);
+    const { popularData } = useGetPopularMovies(state.page);
+    const { searchData, isLoadingSearch, isErrorSearch } = useSearchMovies(debouncedSearch, state.page);
 
     const { movies, totalPages, isLoading, isError, isEmpty } =
         useMovieState({
             searchTerm: debouncedSearch,
-            filters, searchData, discoverData,
-            popularData, isLoadingSearch,
-            isLoadingDiscover, isErrorSearch,
+            filters: state.filters,
+            searchData,
+            discoverData,
+            popularData,
+            isLoadingSearch,
+            isLoadingDiscover,
+            isErrorSearch,
             isErrorDiscover
         });
 
@@ -39,40 +47,50 @@ function Home() {
         e.preventDefault();
         const term = debouncedSearch.trim();
         if (term.length > 1) {
-            setCurrentSearch(term);
-            setPage(1);
-            if (Object.keys(filters).length > 0) {
-                setFilters({});
-            }
+            setState(prev => ({
+                ...prev,
+                currentSearch: term,
+                page: 1,
+                filters: Object.keys(prev.filters).length > 0 ? {} : prev.filters
+            }));
         }
     };
 
     const handleFiltersChange = (newFilters) => {
-        setFilters(newFilters);
-        setPage(1);
-        if (searchTerm.trim().length > 0 || currentSearch.length > 0) {
-            setSearchTerm('');
-            setCurrentSearch('');
-        }
+        setState(prev => ({
+            ...prev,
+            filters: newFilters,
+            page: 1,
+            searchTerm: prev.searchTerm.trim().length > 0 || prev.currentSearch.length > 0 ? '' : prev.searchTerm,
+            currentSearch: prev.searchTerm.trim().length > 0 || prev.currentSearch.length > 0 ? '' : prev.currentSearch
+        }));
+    };
+
+    const handlePageChange = (newPage: number) => {
+        setState(prev => ({ ...prev, page: newPage }));
+    };
+
+    const handleSearchTermChange = (term: string) => {
+        setState(prev => ({ ...prev, searchTerm: term }));
     };
 
     return (
         <React.Fragment>
-            <section style={{marginBottom: '40px'}}>
+            <section className="search-section">
                 <form onSubmit={handleSearch} className="search-box">
                     <input
                         className="search-input"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
+                        value={state.searchTerm}
+                        onChange={(e) => handleSearchTermChange(e.target.value)}
                         placeholder="Search movies..."
                     />
-                    <button className="btn" disabled={searchTerm.trim().length < 2}>
+                    <button className="btn" disabled={state.searchTerm.trim().length < 2}>
                         Search
                     </button>
                 </form>
             </section>
             <main className="home-container">
-                <DiscoverFilters currentFilters={filters} onFiltersChange={handleFiltersChange}/>
+                <DiscoverFilters currentFilters={state.filters} onFiltersChange={handleFiltersChange}/>
                 <div className="home-grid">
                     {isLoading && (
                         <div className="loading">
@@ -100,7 +118,7 @@ function Home() {
                     </div>
 
                     {totalPages > 1 && (
-                        <Pagination page={page} totalPages={totalPages} onPageChange={setPage}/>
+                        <Pagination page={state.page} totalPages={totalPages} onPageChange={handlePageChange}/>
                     )}
                 </div>
             </main>

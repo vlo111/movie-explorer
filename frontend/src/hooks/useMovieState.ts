@@ -1,9 +1,14 @@
-import {MovieMode, PaginatedResponse, UseMovieStateProps, UseMovieStateReturn} from "../types/api";
+import {IUseMovieStateProps, IUseMovieStateReturn} from "../types/hooks";
+import {IPaginatedResponse} from "../types";
+import {IMovie, MovieMode} from "../types/api";
 
-export function useMovieState({
-                                  searchTerm, filters, searchData, discoverData, popularData,
-                                  isLoadingSearch, isLoadingDiscover, isErrorSearch, isErrorDiscover
-                              }: UseMovieStateProps): UseMovieStateReturn {
+export function useMovieState(props: IUseMovieStateProps): IUseMovieStateReturn {
+    const {
+        searchTerm, searchData,
+        isLoadingSearch, isLoadingDiscover,
+        isErrorSearch, isErrorDiscover,
+        discoverData, popularData, filters
+    } = props;
 
     const hasSearch = searchTerm.trim().length > 0;
     const hasFilters = Object.keys(filters).length > 0;
@@ -12,7 +17,7 @@ export function useMovieState({
         ? 'discover'
         : 'popular';
 
-    let data: PaginatedResponse | undefined;
+    let data: IPaginatedResponse<IMovie> | undefined;
     let isLoading = false;
     let isError = false;
 

@@ -1,7 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
-import { getGenres } from '../services/apiService';
+import { getGenres } from '../../services/apiService.ts';
+import {IUseGenresReturn} from "../../types/hooks";
 
-export const useGenres = () => {
+export const useGenres = (): IUseGenresReturn => {
     const { data, isLoading, isError } = useQuery({
         queryKey: ['genres'],
         queryFn: getGenres,
