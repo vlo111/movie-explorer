@@ -1,8 +1,9 @@
-import express from 'express';
+import express, {NextFunction, Request, Response} from 'express';
 import cors from 'cors';
-import indexRouter from './routes';
+import indexRouter from '@/routes/index';
 import createError from 'http-errors';
 import morgan from 'morgan';
+import {IAppError} from "@/types";
 
 const app = express();
 
@@ -27,8 +28,8 @@ app.use((req, res, next) => {
 });
 
 // Error handler
-app.use((err: any, req: express.Request, res: express.Response) => {
-    const statusCode = err.status || 500;
+app.use((err: IAppError, req: Request, res: Response, next: NextFunction) => {
+    const statusCode = err.status || err.statusCode || 500;
 
     res.status(statusCode).json({
         status: 'error',
@@ -41,5 +42,6 @@ app.use((err: any, req: express.Request, res: express.Response) => {
         })
     });
 });
+
 
 export default app;
