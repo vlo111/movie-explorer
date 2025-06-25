@@ -1,10 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 import {IDiscoverMovieFilters, IMovieDetails} from "@/types/movie";
-import {IBody, IGenreListResponse, IMovieListResponse} from "@/types";
+import {IBody, IGenreListResponse, MovieListResponse} from "@/types";
 import {MovieService} from "@/services/movieService";
 
 export const MovieController = {
-    async search(req: Request, res: Response<IBody | IMovieListResponse>, next: NextFunction) {
+    async search(req: Request, res: Response<IBody | MovieListResponse>, next: NextFunction) {
         const { q, page } = req.query;
 
         if (!q) return res.status(400).json({ message: 'Missing search query' });
@@ -18,7 +18,7 @@ export const MovieController = {
         }
     },
 
-    async popular(req: Request, res: Response<IMovieListResponse>, next: NextFunction) {
+    async popular(req: Request, res: Response<MovieListResponse>, next: NextFunction) {
         try {
             const page = +req.query.page || 1;
             const data = await MovieService.getPopular(page);
@@ -45,7 +45,7 @@ export const MovieController = {
         }
     },
 
-    async discover(req: Request, res: Response<IMovieListResponse | IBody>, next: NextFunction) {
+    async discover(req: Request, res: Response<MovieListResponse | IBody>, next: NextFunction) {
         try {
             const page = parseInt(req.query.page as string) || 1;
             const filters: IDiscoverMovieFilters = {};

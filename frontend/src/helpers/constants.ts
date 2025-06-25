@@ -19,3 +19,6 @@ export const SORT_OPTIONS: SearchOptionsType = [
 ];
 
 export const LIMIT_MOVIE = 8
+
+// maximum allowed pages
+export const MAX_ALLOWED_PAGES = 800;

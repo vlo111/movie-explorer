@@ -1,6 +1,6 @@
 import React from 'react';
 import { getImageUrl } from '../../services/apiService.ts';
-import {INoteCardProps} from "../../types";
+import {INoteCardProps} from "../../types/components";
 import RateSVG from "../../assets/icon/star.svg";
 import {useNavigate} from "react-router-dom";
 import {INote} from "../../types/api";

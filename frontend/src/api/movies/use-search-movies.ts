@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import {searchMovies} from '../../services/apiService.ts';
-import {LIMIT_MOVIE} from "../../helpers/constants.ts";
+import {selectResponseData} from "../../helpers/utils.ts";
 
 export const useSearchMovies = (search: string, page: number) => {
 
@@ -9,10 +9,7 @@ export const useSearchMovies = (search: string, page: number) => {
         queryFn: () => searchMovies(search, page),
         enabled: !!search,
         keepPreviousData: true,
-        select: (data) => ({
-            ...data,
-            results: data.results.slice(0, LIMIT_MOVIE),
-        }),
+        select: (data) => selectResponseData(data),
     }
 
     const { data: searchData, isLoading: isLoadingSearch, isError: isErrorSearch} = useQuery(options);

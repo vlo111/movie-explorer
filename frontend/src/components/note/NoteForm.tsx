@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import {INoteFormProps} from "../../types";
+import {INoteFormProps} from "../../types/components";
 import {INoteCreate, INoteUpdate} from "../../types/api";
 
 const NoteForm: React.FC<INoteFormProps> = (props) => {

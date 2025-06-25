@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo } from "react";
 import { useGenres } from "../../api/movies/use-movie-genres.ts";
 import { SORT_OPTIONS } from "../../helpers/constants.ts";
-import {IDiscoverFiltersProps} from "../../types";
+import {IDiscoverFiltersProps} from "../../types//components";
 import {IGenre} from "../../types/api";
 
 const DiscoverFilters: React.FC<IDiscoverFiltersProps> = ({ onFiltersChange, currentFilters }) => {

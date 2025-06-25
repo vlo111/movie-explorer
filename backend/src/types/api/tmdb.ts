@@ -1,8 +1,8 @@
 
-import {IGenreListResponse, IMovieDetails, IMovieListResponse} from "@/types";
+import {IGenreListResponse, IMovieDetails, MovieListResponse} from "@/types";
 
-export type GetMoviesResponse = IMovieListResponse;
-export type GetPopularResponse = IMovieListResponse;
+export type GetMoviesResponse = MovieListResponse;
+export type GetPopularResponse = MovieListResponse;
 export type GetMovieResponse = IMovieDetails;
-export type DiscoverMoviesResponse = IMovieListResponse;
+export type DiscoverMoviesResponse = MovieListResponse;
 export type GetGenresResponse = IGenreListResponse;

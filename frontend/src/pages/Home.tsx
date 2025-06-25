@@ -1,14 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useDebounce } from '../hooks/useDebounce';
-import { useGetPopularMovies } from '../api/movies/use-get-popular-movies.ts';
-import { useSearchMovies } from '../api/movies/use-search-movies.ts';
-import Pagination from '../components/general/Pagination.tsx';
-import MovieCard from '../components/movie/MovieCard.tsx';
-import { useMovieState } from "../hooks/useMovieState";
-import {fallbackError} from "../helpers/utils";
-import DiscoverFilters from "../components/movie/DiscoverFilters.tsx";
-import {useDiscoverMovies} from "../api/movies/use-discover-movies.ts";
-import {IHomeState} from "../types/hooks";
+import { IHomeState } from "../types/hooks";
+import DiscoverFilters from "../components/movie/DiscoverFilters";
+import { MovieDisplay } from '../components/movie/display';
+import {IDiscoverFilters} from "../types/api";
 
 function Home() {
     const [state, setState] = useState<IHomeState>({
@@ -19,63 +14,44 @@ function Home() {
     });
 
     const debouncedSearch = useDebounce(state.searchTerm, 700);
+    const hasFilters = Object.keys(state.filters).length > 0;
 
+    // Clear filters when search is active
     useEffect(() => {
-        if (debouncedSearch.trim().length > 0 && Object.keys(state.filters).length > 0) {
+        if (debouncedSearch.trim().length > 0 && hasFilters) {
             setState(prev => ({ ...prev, filters: {} }));
         }
-    }, [debouncedSearch]);
+    }, [debouncedSearch, hasFilters]);
 
-    const { discoverData, isLoadingDiscover, isErrorDiscover } = useDiscoverMovies(state.filters, state.page);
-    const { popularData } = useGetPopularMovies(state.page);
-    const { searchData, isLoadingSearch, isErrorSearch } = useSearchMovies(debouncedSearch, state.page);
-
-    const { movies, totalPages, isLoading, isError, isEmpty } =
-        useMovieState({
-            searchTerm: debouncedSearch,
-            filters: state.filters,
-            searchData,
-            discoverData,
-            popularData,
-            isLoadingSearch,
-            isLoadingDiscover,
-            isErrorSearch,
-            isErrorDiscover
-        });
+    const updateState = (updates: Partial<IHomeState>) =>
+        setState(prev => ({ ...prev, ...updates }));
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
         const term = debouncedSearch.trim();
         if (term.length > 1) {
-            setState(prev => ({
-                ...prev,
+            updateState({
                 currentSearch: term,
                 page: 1,
-                filters: Object.keys(prev.filters).length > 0 ? {} : prev.filters
-            }));
+                ...(hasFilters && { filters: {} })
+            });
         }
     };
 
-    const handleFiltersChange = (newFilters) => {
-        setState(prev => ({
-            ...prev,
+    const handleFiltersChange = (newFilters: IDiscoverFilters) => {
+        const hasSearchActive = state.searchTerm.trim().length > 0 || state.currentSearch.length > 0;
+        updateState({
             filters: newFilters,
             page: 1,
-            searchTerm: prev.searchTerm.trim().length > 0 || prev.currentSearch.length > 0 ? '' : prev.searchTerm,
-            currentSearch: prev.searchTerm.trim().length > 0 || prev.currentSearch.length > 0 ? '' : prev.currentSearch
-        }));
+            ...(hasSearchActive && { searchTerm: '', currentSearch: '' })
+        });
     };
 
-    const handlePageChange = (newPage: number) => {
-        setState(prev => ({ ...prev, page: newPage }));
-    };
-
-    const handleSearchTermChange = (term: string) => {
-        setState(prev => ({ ...prev, searchTerm: term }));
-    };
+    const handlePageChange = (newPage: number) => updateState({ page: newPage });
+    const handleSearchTermChange = (searchTerm: string) => updateState({ searchTerm });
 
     return (
-        <React.Fragment>
+        <>
             <section className="search-section">
                 <form onSubmit={handleSearch} className="search-box">
                     <input
@@ -89,40 +65,23 @@ function Home() {
                     </button>
                 </form>
             </section>
+
             <main className="home-container">
-                <DiscoverFilters currentFilters={state.filters} onFiltersChange={handleFiltersChange}/>
+                <DiscoverFilters
+                    currentFilters={state.filters}
+                    onFiltersChange={handleFiltersChange}
+                />
+
                 <div className="home-grid">
-                    {isLoading && (
-                        <div className="loading">
-                            <div className="spinner"/>
-                            <p>Loading movies...</p>
-                        </div>
-                    )}
-
-                    {isError && (
-                        <div className="message error">
-                            {fallbackError('movie')}
-                        </div>
-                    )}
-
-                    {isEmpty && (
-                        <div className="message">
-                            <h3>No results</h3>
-                        </div>
-                    )}
-
-                    <div className="grid">
-                        {movies.map((movie) => (
-                            <MovieCard key={movie.id} movie={movie}/>
-                        ))}
-                    </div>
-
-                    {totalPages > 1 && (
-                        <Pagination page={state.page} totalPages={totalPages} onPageChange={handlePageChange}/>
-                    )}
+                    <MovieDisplay
+                        searchTerm={debouncedSearch}
+                        filters={state.filters}
+                        page={state.page}
+                        onPageChange={handlePageChange}
+                    />
                 </div>
             </main>
-        </React.Fragment>
+        </>
     );
 }
 

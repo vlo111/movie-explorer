@@ -1,5 +1,5 @@
 import {IDiscoverFilters, IMovie} from "../api";
-import {IPaginatedResponse} from "../index.ts";
+import {IPaginatedResponse} from "../";
 
 export interface IUseMovieStateProps {
     searchTerm: string;

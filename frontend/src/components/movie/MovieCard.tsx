@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getImageUrl } from "../../services/apiService.ts";
-import {IMovieCardProps} from "../../types";
+import {IMovieCardProps} from "../../types/components";
 import {PATHS} from "../../helpers/constants.ts";
 import RateSVG from '../../assets/icon/star.svg'
 

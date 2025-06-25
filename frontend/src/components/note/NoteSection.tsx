@@ -3,7 +3,7 @@ import NoteForm from "./NoteForm.tsx";
 import {useNoteByMovieId} from "../../api/notes/use-get-note-by-id.ts";
 import {useUpdateNote} from "../../api/notes/use-update-note.ts";
 import {useCreateNote} from "../../api/notes/use-create-note.ts";
-import {INoteSectionProps} from "../../types";
+import {INoteSectionProps} from "../../types/components";
 import {INote, INoteCreate} from "../../types/api";
 import RateSVG from '../../assets/icon/star.svg'
 

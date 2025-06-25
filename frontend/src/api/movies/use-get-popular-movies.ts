@@ -1,16 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import {popularMovies} from '../../services/apiService.ts';
-import {LIMIT_MOVIE} from "../../helpers/constants.ts";
+import {selectResponseData} from "../../helpers/utils.ts";
 
 export const useGetPopularMovies = (page) => {
     const options = {
         queryKey: ["popular", page],
         queryFn: () => popularMovies(page),
         keepPreviousData: true,
-        select: (data) => ({
-            ...data,
-            results: data.results.slice(0, LIMIT_MOVIE),
-        }),
+        select: (data) => selectResponseData(data),
     }
 
     const { data: popularData, isLoading: isLoadingPopular, isError: isErrorPopular} = useQuery(options);

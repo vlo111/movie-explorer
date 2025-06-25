@@ -1,7 +1,7 @@
 import React from 'react'
 import {getImageUrl} from "../../services/apiService.ts";
 import { NoteSection } from '../note/NoteSection.tsx';
-import {IMovieDetailsViewProps} from "../../types";
+import {IMovieDetailsViewProps} from "../../types/components";
 import RateSVG from "../../assets/icon/star.svg";
 
 const MovieDetailsView: React.FC<IMovieDetailsViewProps> = ({ movie, setSelectedMovieId }) => {
